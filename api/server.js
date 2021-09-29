@@ -14,14 +14,14 @@ server.use(express.json());
 server.post("/api/users",(req,res)=>{
     const newUser = req.body;
     if(!newUser.name || !newUser.bio){
-        res.status(400).json("Please provide name and bio for the user")
+        res.status(400).json("Please provide name and bio for the user");
     } else {
         Model.insert(newUser)
         .then(user=>{
             res.status(201).json(user)
         })
         .catch(error=>{
-            res.status(500).json({message:error.message})
+            res.status(500).json({message:"There was and error while saving the user to the database"});
         });
     };
 });
@@ -33,7 +33,7 @@ server.get("/api/users",(req,res)=>{
             res.status(200).json(users);
         })
         .catch(error=>{
-            res.status(500).json({message:error.message});
+            res.status(500).json({message:"The users information could not be retrieved"});
         });
 });
 
@@ -43,31 +43,31 @@ server.get("/api/users/:id",(req,res)=>{
     Model.findById(idVar)
         .then(user=>{
             if(!user){
-                res.status(400).json(`User ${idVar} does not exist`);
+                res.status(404).json(`The user with the specified ID does not exist`);
             } else {
                 res.status(200).json(user);
             }
         })
         .catch(error=>{
-            res.status(500).json({message:error.message});
+            res.status(500).json({message:"The user information could not be retrieved"});
         });
 });
 
 // [Delete], removes user with the specific id and returns the deleted user
 server.delete("/api/users/:id", async (req,res)=>{
     try{
-        const {id} = req.params
-        const deletedUser = await Model.remove(id)
+        const {id} = req.params;
+        const deletedUser = await Model.remove(id);
         if(!deletedUser){
-            res.status(500).json("User doesn't exist")
+            res.status(404).json("The user with the specified ID does not exist");
         } else {
-            res.status(200).json(deletedUser)
+            res.status(200).json(deletedUser);
         }
     }
     catch(error){
-        res.status(500).json({message:error.message})
-    }
-})
+        res.status(500).json({message:"The user could not be removed"});
+    };
+});
 
 // [Put], updates the user with the specified id using data from req body, returns the modified user
 server.put("/api/users/:id",async (req,res)=>{
@@ -75,20 +75,20 @@ server.put("/api/users/:id",async (req,res)=>{
     const changes = req.body;
     try{
         if(!changes.name || !changes.bio){
-            res.status(422).json("Name and Bio required")
+            res.status(400).json("Please provide name and bio for the user");
         } else {
-            const updatedUser = await Model.update(id, changes)
+            const updatedUser = await Model.update(id, changes);
             if(!updatedUser){
-                res.status(500).json("User doesn't exist")
+                res.status(404).json("The user with the specified ID does not exist");
             } else {
-                res.status(200).json(updatedUser)
+                res.status(200).json(updatedUser);
             }
         }
     }
     catch(error){
-        res.status(500).json({message:error.message})
-    }
-})
+        res.status(500).json({message:"The user information could not be modified"});
+    };
+});
 
 //404 Endpoint
 server.use("*",(req,res)=>{
